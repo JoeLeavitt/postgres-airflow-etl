@@ -4,7 +4,7 @@ Provisions a PostgreSQL database and a simple Airflow environment for ETL pipeli
 ### Create .env file
 ```
 cat << EOF > .env
-POSTGRES_DB=winequality
+POSTGRES_DB=DATA
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=postgres
 POSTGRES_HOST=database
