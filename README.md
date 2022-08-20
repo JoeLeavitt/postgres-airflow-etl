@@ -28,7 +28,7 @@ docker network create $NETWORK_NAME
 
 ### Start external Postgres DB
 ```
-docker-compose -f ./postgres-docker-compose.yaml up -d
+docker-compose -f postgres-docker-compose.yaml up -d
 ```
 
 ### Retrieve Jupyter url with access token
