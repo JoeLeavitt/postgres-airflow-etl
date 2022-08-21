@@ -15,7 +15,7 @@ EOF
 ### Install yq
 https://mikefarah.gitbook.io/yq/v/v3.x/
 
-Mac/Linux: ```brew install yq@3```
+Mac/Linux: ```brew install yq```
 
 Windows: ```choco install yq```
 
