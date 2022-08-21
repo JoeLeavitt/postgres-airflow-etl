@@ -62,19 +62,7 @@ def extract(dataset_url):
 
 @logger
 def transform(df):
-    # transformation
-    print("Transforming data")
-    df_transform = df.copy()
-    gender_encoded = pd.get_dummies(df_transform["gender"], prefix="gender")
-    df_transform[winecolor_encoded.columns.to_list()] = gender_encoded
-    df_transform.drop("gender", axis=1, inplace=True)
-
-    for column in df_transform.columns:
-        df_transform[column] = (
-            df_transform[column] - df_transform[column].mean()
-        ) / df_transform[column].std()
-    return df
-
+    pass
 
 @logger
 def check_table_exists(table_name, engine):
