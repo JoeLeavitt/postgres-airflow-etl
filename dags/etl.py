@@ -14,9 +14,9 @@ from sqlalchemy import create_engine, inspect
 
 args = {"owner": "Airflow", "start_date": days_ago(1)}
 
-dag = DAG(dag_id="dogPOO", default_args=args, schedule_interval=None)
+dag = DAG(dag_id="etl", default_args=args, schedule_interval=None)
 
-DATASET_URL = "https://gist.github.com/JoeLeavitt/f9d1e14e87f2ca41609b0af63fbab7af"
+DATASET_URL = "https://gist.githubusercontent.com/JoeLeavitt/f9d1e14e87f2ca41609b0af63fbab7af/raw/9fedfd46068bdf6ee62731da4cf08c56df7c4866/DATA.csv"
 
 
 CONFIG = dotenv_values(".env")
