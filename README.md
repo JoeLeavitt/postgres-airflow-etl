@@ -29,6 +29,7 @@ docker network create $NETWORK_NAME
 ### Start external Postgres DB
 ```
 docker-compose -f postgres-docker-compose.yaml up -d
+docker-compose --env-file ./.env -f ./postgres-docker-compose.yaml up -d
 ```
 
 ### Retrieve Jupyter url with access token
@@ -60,4 +61,11 @@ Webserver available at: ```http://localhost:8080```
 ```
 docker-compose -f airflow-docker-compose.yaml down
 docker-compose -f postgres-docker-compose.yaml down
+```
+
+### Full Removal
+```
+docker-compose -f airflow-docker-compose.yaml down --volumes --rmi all
+docker-compose -f postgres-docker-compose.yaml down --volumes --rmi all
+docker network rm etl_network
 ```
