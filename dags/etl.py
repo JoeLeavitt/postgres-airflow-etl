@@ -1,5 +1,4 @@
 import os
-
 from functools import wraps
 
 import pandas as pd
@@ -85,11 +84,11 @@ def etl():
     raw_df = extract(DATASET_URL)
     raw_table_name = "raw_DATA"
 
-    clean_df = transform(raw_df)
-    clean_table_name = "clean_DATA"
+    #clean_df = transform(raw_df)
+    #clean_table_name = "clean_DATA"
 
     load_to_db(raw_df, raw_table_name, db_engine)
-    load_to_db(clean_df, clean_table_name, db_engine)
+    #load_to_db(clean_df, clean_table_name, db_engine)
 
 
 @logger
@@ -97,7 +96,7 @@ def tables_exists():
     db_engine = connect_db()
     print("Checking if tables exists")
     check_table_exists("raw_DATA", db_engine)
-    check_table_exists("clean_DATA", db_engine)
+    #check_table_exists("clean_DATA", db_engine)
 
     db_engine.dispose()
 
