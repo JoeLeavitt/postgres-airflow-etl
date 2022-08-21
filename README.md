@@ -40,7 +40,7 @@ docker logs $(docker ps -q --filter "ancestor=jupyter/minimal-notebook") 2>&1 | 
 ```
 mkdir ./logs ./plugins
 chmod -R 777 ./dags ./logs ./plugins
-echo -e "AIRFLOW_UID=$(id -u)\nAIRFLOW_GID=0" > .env
+echo -e "AIRFLOW_UID=$(id -u)\nAIRFLOW_GID=0" >> .env
 ```
 
 ### Intialize Airflow Metadata Database
