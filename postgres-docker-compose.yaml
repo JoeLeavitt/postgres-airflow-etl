@@ -9,7 +9,7 @@ services:
     ports:
       - "8888:8888"
     volumes:
-      - /c/Users/Joe/airflow-pg:/home/jovyan/work
+      - .:/home/workspace
     depends_on:
       - database
     links:
