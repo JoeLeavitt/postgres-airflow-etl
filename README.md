@@ -1,47 +1,19 @@
 # postgres-airflow-etl
 Provisions a PostgreSQL database and a simple Airflow environment for ETL pipelines
 
-### Create .env file
+### Setup Postgres and Airflow environment
 ```
-cat << EOF > .env
-POSTGRES_DB=DATA
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=postgres
-POSTGRES_HOST=database
-POSTGRES_PORT=5432
-EOF
+bash setup.sh
 ```
 
-### Install yq
-https://mikefarah.gitbook.io/yq/v/v3.x/
-
-Mac/Linux: ```brew install yq```
-
-Windows: ```choco install yq```
-
-### Create docker network
+### Give Airflow Full Access To Airflow Specific Directories
 ```
-source .env
-NETWORK_NAME=$(yq eval '.networks' postgres-docker-compose.yaml | cut -f 1 -d':')
-docker network create $NETWORK_NAME
+chmod -R 777 ./dags ./logs ./plugins
 ```
 
-### Start external Postgres DB
+### Start External Postgres Database
 ```
 docker-compose -f postgres-docker-compose.yaml up -d
-docker-compose --env-file ./.env -f ./postgres-docker-compose.yaml up -d
-```
-
-### Retrieve Jupyter url with access token
-```
-docker logs $(docker ps -q --filter "ancestor=jupyter/minimal-notebook") 2>&1 | grep 'http://127.0.0.1' | tail -1
-```
-
-### Setup Airflow
-```
-mkdir ./logs ./plugins
-chmod -R 777 ./dags ./logs ./plugins
-echo -e "AIRFLOW_UID=$(id -u)\nAIRFLOW_GID=0" >> .env
 ```
 
 ### Intialize Airflow Metadata Database
@@ -54,7 +26,9 @@ docker-compose -f airflow-docker-compose.yaml up airflow-init
 docker-compose -f airflow-docker-compose.yaml up -d
 ```
 
-###
+### Wait For All Services To Be In A Healthy State
+```docker ps```
+
 Webserver available at: ```http://localhost:8080```
 
 ### Shut Everything Down
@@ -67,6 +41,11 @@ docker-compose -f postgres-docker-compose.yaml down
 ```
 docker-compose -f airflow-docker-compose.yaml down --volumes --rmi all
 docker-compose -f postgres-docker-compose.yaml down --volumes --rmi all
-docker network rm etl_network
-docker system prune
+docker network rm airflow_network
+docker system prune -a
+```
+
+### Retrieve Jupyter URL With Access Token
+```
+docker logs $(docker ps -q --filter "ancestor=jupyter/minimal-notebook") 2>&1 | grep 'http://127.0.0.1' | tail -1
 ```
