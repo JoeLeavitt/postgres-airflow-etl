@@ -41,7 +41,7 @@ docker-compose -f postgres-docker-compose.yaml down
 ```
 docker-compose -f airflow-docker-compose.yaml down --volumes --rmi all
 docker-compose -f postgres-docker-compose.yaml down --volumes --rmi all
-docker network rm etl_network
+docker network rm airflow_network
 docker system prune -a
 ```
 
