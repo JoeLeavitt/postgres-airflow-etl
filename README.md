@@ -6,14 +6,14 @@ Provisions a PostgreSQL database and a simple Airflow environment for ETL pipeli
 bash setup.sh
 ```
 
-### Start External Postgres Database
-```
-docker-compose -f postgres-docker-compose.yaml up -d
-```
-
 ### Give Airflow Full Access To Airflow Specific Directories
 ```
 chmod -R 777 ./dags ./logs ./plugins
+```
+
+### Start External Postgres Database
+```
+docker-compose -f postgres-docker-compose.yaml up -d
 ```
 
 ### Intialize Airflow Metadata Database
