@@ -28,6 +28,7 @@ docker-compose -f airflow-docker-compose.yaml up -d
 
 ### Wait For All Services To Be In A Healthy State
 ```docker ps```
+
 Webserver available at: ```http://localhost:8080```
 
 ### Shut Everything Down
