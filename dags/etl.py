@@ -1,45 +1,31 @@
 import os
-from functools import wraps
-
 import pandas as pd
-
-from airflow.models import DAG
-from airflow.utils.dates import days_ago
-from airflow.operators.python import PythonOperator
 
 from dotenv import dotenv_values
 from sqlalchemy import create_engine, inspect
-
-
-args = {"owner": "Airflow", "start_date": days_ago(1)}
-
-dag = DAG(dag_id="etl", default_args=args, schedule_interval=None)
-
-DATASET_URL = "https://gist.githubusercontent.com/JoeLeavitt/f9d1e14e87f2ca41609b0af63fbab7af/raw/9fedfd46068bdf6ee62731da4cf08c56df7c4866/DATA.csv"
-
+from airflow.models import DAG
+from airflow.utils.dates import days_ago
+from airflow.operators.python import PythonOperator
+from airflow.operators.dummy_operator import DummyOperator
 
 CONFIG = dotenv_values(".env")
 if not CONFIG:
     CONFIG = os.environ
 
+DATASET_URL = "https://gist.githubusercontent.com/JoeLeavitt/f9d1e14e87f2ca41609b0af63fbab7af/raw/9fedfd46068bdf6ee62731da4cf08c56df7c4866/DATA.csv"
 
-def logger(fn):
-    from datetime import datetime, timezone
+default_args = {
+    "owner": "Airflow",
+    'depends_on_past': False,
+    'email_on_failure': False,
+    'email_on_retry': False,
+    'retries': 1,
+    "start_date": days_ago(1)
+}
 
-    @wraps(fn)
-    def inner(*args, **kwargs):
-        called_at = datetime.now(timezone.utc)
-        print(f">>> Running {fn.__name__!r} function. Logged at {called_at}")
-        to_execute = fn(*args, **kwargs)
-        print(f">>> Function: {fn.__name__!r} executed. Logged at {called_at}")
-        return to_execute
+def start_connection():
+    print("Starting connection to Postgres Database")
 
-    return inner
-
-
-@logger
-def connect_db():
-    print("Connecting to DB")
     connection_uri = "postgresql+psycopg2://{}:{}@{}:{}".format(
         CONFIG["POSTGRES_USER"],
         CONFIG["POSTGRES_PASSWORD"],
@@ -48,62 +34,76 @@ def connect_db():
     )
 
     engine = create_engine(connection_uri, pool_pre_ping=True)
+
     engine.connect()
+
     return engine
 
-
-@logger
 def extract(dataset_url):
-    print(f"Reading dataset from {dataset_url}")
+    print(f"Querying data from {dataset_url}")
+
     df = pd.read_csv(dataset_url)
+
     return df
 
-
-@logger
 def transform(df):
-    pass
+    print("Performing simple transforms on the data")
 
-@logger
-def check_table_exists(table_name, engine):
-    if table_name in inspect(engine).get_table_names():
-        print(f"{table_name!r} exists in the DB!")
-    else:
-        print(f"{table_name} does not exist in the DB!")
+    email_idx = df.columns.get_loc("email")
+    email_domains = []
 
+    # Cleanup Data
+    df = df.drop_duplicates()
 
-@logger
-def load_to_db(df, table_name, engine):
-    print(f"Loading dataframe to DB on table: {table_name}")
+    for email in df['email']:
+        slice_at = email.index('@') + 1
+        email_domains.append(email[slice_at:])
+
+    # Add Column For Email Domain
+    df.insert(email_idx+1, "email_domain", email_domains, allow_duplicates=True)
+
+    return df
+
+def load(df, table_name, engine):
+    print("Loading data into Postgres database (DATA table)")
+
     df.to_sql(table_name, engine, if_exists="replace")
 
-
-@logger
 def etl():
-    db_engine = connect_db()
+    engine = start_connection()
 
+    # Extract
     raw_df = extract(DATASET_URL)
-    raw_table_name = "raw_DATA"
 
-    #clean_df = transform(raw_df)
-    #clean_table_name = "clean_DATA"
+    # Transform
+    transformed_df = transform(raw_df)
 
-    load_to_db(raw_df, raw_table_name, db_engine)
-    #load_to_db(clean_df, clean_table_name, db_engine)
+    # Load
+    load(transformed_df, "DATA", engine)
 
+    engine.dispose()
 
-@logger
-def tables_exists():
-    db_engine = connect_db()
-    print("Checking if tables exists")
-    check_table_exists("raw_DATA", db_engine)
-    #check_table_exists("clean_DATA", db_engine)
+def check_table():
+    engine = start_connection()
 
-    db_engine.dispose()
+    print("Checking table in Postgres Database")
 
+    if "DATA" in inspect(engine).get_table_names():
+        print(f"SUCCESS! DATA table found in the Postgres database")
 
-with dag:
-    run_etl_task = PythonOperator(task_id="run_etl_task", python_callable=etl)
-    run_tables_exists_task = PythonOperator(
-        task_id="run_tables_exists_task", python_callable=tables_exists)
+        engine.dispose()
 
-    run_etl_task >> run_tables_exists_task
+        return True
+    else:
+        print(f"FAILURE! DATA table was not created")
+
+        engine.dispose()
+
+        return False
+
+with DAG(dag_id="etl_pipeline", max_active_runs=1, default_args=default_args, catchup=False, schedule_interval=None) as dag:
+    t1 = PythonOperator(task_id="etl_task", python_callable=etl)
+    t2 = PythonOperator(task_id="check_table_task", python_callable=check_table)
+    t3 = DummyOperator(task_id="generate_analytics_task")
+
+    t1 >> t2 >> t3

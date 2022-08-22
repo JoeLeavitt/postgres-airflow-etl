@@ -1,7 +1,8 @@
 version: "3.8"
-# Optional Jupyter Notebook service
 services:
   jupyter_notebook:
+    env_file:
+      - ./.env
     image: "jupyter/minimal-notebook"
     container_name: jupyter_notebook
     environment:
@@ -15,9 +16,11 @@ services:
     links:
       - database
     networks:
-      - etl_network
+      - airflow_network
 
   database:
+    env_file:
+      - ./.env
     image: "postgres:11"
     container_name: database
     ports:
@@ -47,11 +50,10 @@ services:
       - /tmp/pg-data/:/var/lib/postgresql/data/
       - ./init-db.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
-      - etl_network
+      - airflow_network
 
 volumes:
   dbdata: null
 
-# Create a custom network for bridging the containers
 networks:
-  etl_network: null
+  airflow_network: null
