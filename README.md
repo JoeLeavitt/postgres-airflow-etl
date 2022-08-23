@@ -49,6 +49,9 @@ docker-compose -f airflow-docker-compose.yaml up -d
 ```
 
 ## Running the Pipeline
+Before running the pipeline wait until all the Airflow containers are in a healthy state, you can check this by
+running `docker ps` and looking at the STATUS column. All columns should read "healthy".
+
 To run the pipeline, you'll need to log in to the Airflow interface by navigating to
 http://localhost:8080. The username is `airflow` and the password is `airflow`. You
 should see a list with one DAG called `etl_pipeline`. This pipeline pulls the
