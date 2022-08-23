@@ -58,7 +58,7 @@ the DAG will be off. To turn it on, click the toggle switch to unpause the DAG.
 The DAG is now ready to be manually executed. To do so, click the play button on the
 end of the row and choose "Trigger DAG". The task is now running, and you can refresh 
 the page to see an indication of its progress. Wait about 10 seconds (in my testing, 
-the task finished instantly) and refresh the page. Click the green outlined circle in 
+the DAG finished nearly instantly) and refresh the page. Click the green outlined circle in 
 the `Runs` column and select the graph view of the DAG. You can also click each node 
 in the DAG to view the task logs and details.
 
