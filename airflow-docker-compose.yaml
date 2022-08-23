@@ -32,6 +32,8 @@ x-airflow-common:
     AIRFLOW__CORE__FERNET_KEY: ''
     AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
     AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+    AIRFLOW__SCHEDULER__MIN_FILE_PROCESS_INTERVAL: '60'
+    AIRFLOW__WEBSERVER__WORKERS: '3'
     AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth'
     _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:-}
 
@@ -42,6 +44,7 @@ x-airflow-common:
   env_file:
     - ./.env
   user: "${AIRFLOW_UID:-50000}:0"
+  mem_limit: 4000m
   depends_on:
     &airflow-common-depends-on
     redis:
